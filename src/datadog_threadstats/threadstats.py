@@ -14,62 +14,54 @@ from datadog_api_client.v2.model.metric_series import MetricSeries
 
 
 class ThreadStats:
-
     def __init__(self):
         self.api_client = ApiClient(Configuration())
         self.metrics_api = MetricsApi(self.api_client)
         self.logs_api = LogsApi(self.api_client)
         self.periodic_task = PeriodicTask(self.flush)
-        self.calls = []
+        self.metric_series = []
+        self.log_items = []
 
     def start(self):
         self.periodic_task.start()
 
     def log(self, message):
-        payload = HTTPLog(
-            [
-                HTTPLogItem(
-                    message=message,
-                ),
-            ]
+        self.log_items.append(
+            HTTPLogItem(
+                message=message,
+            )
         )
-        self.calls.append((self.logs_api.submit_log, (payload,)))
 
-    def count(self, metric, value=1):
-        payload = MetricPayload(
-            series=[
-                MetricSeries(
-                    metric=metric,
-                    type=MetricIntakeType.COUNT,
-                    points=[
-                        MetricPoint(
-                            timestamp=int(datetime.now().timestamp()),
-                            value=value,
-                        ),
-                    ],
-                ),
-            ],
-        )
-        self.calls.append((self.metrics_api.submit_metrics, (payload,)))
+    def rate(self, metric_name, value, tags=None):
+        self.metric(metric_name, MetricIntakeType.RATE, value, tags)
 
-    def gauge(self, metric, value):
-        payload = MetricPayload(
-            series=[
-                MetricSeries(
-                    metric=metric,
-                    type=MetricIntakeType.GAUGE,
-                    points=[
-                        MetricPoint(
-                            timestamp=int(datetime.now().timestamp()),
-                            value=value,
-                        ),
-                    ],
-                ),
-            ],
+    def count(self, metric_name, value=1, tags=None):
+        self.metric(metric_name, MetricIntakeType.COUNT, value, tags)
+
+    def gauge(self, metric_name, value, tags=None):
+        self.metric(metric_name, MetricIntakeType.GAUGE, value, tags)
+
+    def metric(self, metric_name, metric_type, value, tags=None):
+        self.metric_series.append(
+            MetricSeries(
+                metric=metric_name,
+                type=metric_type,
+                points=[
+                    MetricPoint(
+                        timestamp=int(datetime.now().timestamp()),
+                        value=value,
+                    )
+                ],
+            )
         )
-        self.calls.append((self.metrics_api.submit_metrics, (payload,)))
 
     def flush(self):
-        while self.calls:
-            call, call_args = self.calls.pop(0)
-            call(*call_args)
+        metric_series, self.metric_series = self.metric_series, []
+        if metric_series:
+            payload = MetricPayload(series=metric_series)
+            self.metrics_api.submit_metrics(payload)
+
+        log_items, self.log_items = self.log_items, []
+        if log_items:
+            payload = HTTPLog(log_items)
+            self.logs_api.submit_log(payload)

@@ -2,7 +2,6 @@ from threading import Thread, Event
 
 
 class PeriodicTask:
-
     def __init__(self, task):
         self.task = task
         self.interval = 60
