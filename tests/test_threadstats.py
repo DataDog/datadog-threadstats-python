@@ -89,18 +89,18 @@ def test_gauge():
 @freeze_time()
 def test_log():
     stats = ThreadStats()
-    stats.log("First log")
-    assert stats.log_items == [HTTPLogItem(message="First log")]
+    stats.log("First log", source="python")
+    assert stats.log_items == [HTTPLogItem(message="First log", ddsource="python")]
 
-    stats.log("Second log")
-    assert stats.log_items == [HTTPLogItem(message="First log"), HTTPLogItem(message="Second log")]
+    stats.log("Second log", service="myapp")
+    assert stats.log_items == [HTTPLogItem(message="First log", ddsource="python"), HTTPLogItem(message="Second log", service="myapp")]
 
     calls = []
     stats.logs_api.submit_log = calls.append
 
     stats.flush()
     assert calls == [
-        HTTPLog([HTTPLogItem(message="First log"), HTTPLogItem(message="Second log")])
+        HTTPLog([HTTPLogItem(message="First log", ddsource="python"), HTTPLogItem(message="Second log", service="myapp")])
     ]
 
     assert stats.log_items == []

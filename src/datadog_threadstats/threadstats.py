@@ -25,12 +25,18 @@ class ThreadStats:
     def start(self):
         self.periodic_task.start()
 
-    def log(self, message):
-        self.log_items.append(
-            HTTPLogItem(
-                message=message,
-            )
-        )
+    def log(self, message, source=None, hostname=None, service=None, tags=None):
+        kwargs = {"message": message}
+        if source is not None:
+            kwargs["ddsource"] = source
+        if hostname is not None:
+            kwargs["hostname"] = hostname
+        if service is not None:
+            kwargs["service"] = service
+        if tags is not None:
+            kwargs["ddtags"] = tags
+
+        self.log_items.append(HTTPLogItem(**kwargs))
 
     def rate(self, metric_name, value, tags=None):
         self.metric(metric_name, MetricIntakeType.RATE, value, tags)
