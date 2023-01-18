@@ -1,3 +1,7 @@
+# Unless explicitly stated otherwise all files in this repository are licensed under the Apache-2.0 License.
+# This product includes software developed at Datadog (https://www.datadoghq.com/).
+# Copyright 2023-Present Datadog, Inc.
+
 from .periodic import PeriodicTask
 
 from datetime import datetime
@@ -14,11 +18,13 @@ from datadog_api_client.v2.model.metric_series import MetricSeries
 
 
 class ThreadStats:
-    def __init__(self):
-        self.api_client = ApiClient(Configuration())
+    def __init__(self, configuration=None, flush_interval=60):
+        if configuration is None:
+            configuration = Configuration()
+        self.api_client = ApiClient(configuration)
         self.metrics_api = MetricsApi(self.api_client)
         self.logs_api = LogsApi(self.api_client)
-        self.periodic_task = PeriodicTask(self.flush)
+        self.periodic_task = PeriodicTask(self.flush, flush_interval)
         self.metric_series = []
         self.log_items = []
 

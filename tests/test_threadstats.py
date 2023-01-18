@@ -1,3 +1,7 @@
+# Unless explicitly stated otherwise all files in this repository are licensed under the Apache-2.0 License.
+# This product includes software developed at Datadog (https://www.datadoghq.com/).
+# Copyright 2023-Present Datadog, Inc.
+
 from datetime import datetime
 from freezegun import freeze_time
 
@@ -51,7 +55,7 @@ def test_gauge():
                     value=3.0,
                 )
             ],
-        )
+        ),
     ]
 
     calls = []
@@ -59,28 +63,30 @@ def test_gauge():
 
     stats.flush()
     assert calls == [
-        MetricPayload(series=[
-            MetricSeries(
-                metric="mymetric",
-                type=MetricIntakeType.GAUGE,
-                points=[
-                    MetricPoint(
-                        timestamp=int(datetime.now().timestamp()),
-                        value=2.0,
-                    )
-                ],
-            ),
-            MetricSeries(
-                metric="mymetric",
-                type=MetricIntakeType.GAUGE,
-                points=[
-                    MetricPoint(
-                        timestamp=int(datetime.now().timestamp()),
-                        value=3.0,
-                    )
-                ],
-            )
-        ])
+        MetricPayload(
+            series=[
+                MetricSeries(
+                    metric="mymetric",
+                    type=MetricIntakeType.GAUGE,
+                    points=[
+                        MetricPoint(
+                            timestamp=int(datetime.now().timestamp()),
+                            value=2.0,
+                        )
+                    ],
+                ),
+                MetricSeries(
+                    metric="mymetric",
+                    type=MetricIntakeType.GAUGE,
+                    points=[
+                        MetricPoint(
+                            timestamp=int(datetime.now().timestamp()),
+                            value=3.0,
+                        )
+                    ],
+                ),
+            ]
+        )
     ]
 
     assert stats.metric_series == []
@@ -93,14 +99,19 @@ def test_log():
     assert stats.log_items == [HTTPLogItem(message="First log", ddsource="python")]
 
     stats.log("Second log", service="myapp")
-    assert stats.log_items == [HTTPLogItem(message="First log", ddsource="python"), HTTPLogItem(message="Second log", service="myapp")]
+    assert stats.log_items == [
+        HTTPLogItem(message="First log", ddsource="python"),
+        HTTPLogItem(message="Second log", service="myapp"),
+    ]
 
     calls = []
     stats.logs_api.submit_log = calls.append
 
     stats.flush()
     assert calls == [
-        HTTPLog([HTTPLogItem(message="First log", ddsource="python"), HTTPLogItem(message="Second log", service="myapp")])
+        HTTPLog(
+            [HTTPLogItem(message="First log", ddsource="python"), HTTPLogItem(message="Second log", service="myapp")]
+        )
     ]
 
     assert stats.log_items == []
