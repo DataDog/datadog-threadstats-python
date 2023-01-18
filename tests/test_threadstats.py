@@ -20,7 +20,7 @@ def test_gauge():
     stats = ThreadStats()
     stats.gauge("mymetric", 2.0)
 
-    assert stats.metric_series == [
+    assert stats._metric_series == [
         MetricSeries(
             metric="mymetric",
             type=MetricIntakeType.GAUGE,
@@ -35,7 +35,7 @@ def test_gauge():
 
     stats.gauge("mymetric", 3.0)
 
-    assert stats.metric_series == [
+    assert stats._metric_series == [
         MetricSeries(
             metric="mymetric",
             type=MetricIntakeType.GAUGE,
@@ -59,9 +59,9 @@ def test_gauge():
     ]
 
     calls = []
-    stats.metrics_api.submit_metrics = calls.append
+    stats._metrics_api.submit_metrics = calls.append
 
-    stats.flush()
+    stats._flush()
     assert calls == [
         MetricPayload(
             series=[
@@ -89,29 +89,29 @@ def test_gauge():
         )
     ]
 
-    assert stats.metric_series == []
+    assert stats._metric_series == []
 
 
 @freeze_time()
 def test_log():
     stats = ThreadStats()
     stats.log("First log", source="python")
-    assert stats.log_items == [HTTPLogItem(message="First log", ddsource="python")]
+    assert stats._log_items == [HTTPLogItem(message="First log", ddsource="python")]
 
     stats.log("Second log", service="myapp")
-    assert stats.log_items == [
+    assert stats._log_items == [
         HTTPLogItem(message="First log", ddsource="python"),
         HTTPLogItem(message="Second log", service="myapp"),
     ]
 
     calls = []
-    stats.logs_api.submit_log = calls.append
+    stats._logs_api.submit_log = calls.append
 
-    stats.flush()
+    stats._flush()
     assert calls == [
         HTTPLog(
             [HTTPLogItem(message="First log", ddsource="python"), HTTPLogItem(message="Second log", service="myapp")]
         )
     ]
 
-    assert stats.log_items == []
+    assert stats._log_items == []

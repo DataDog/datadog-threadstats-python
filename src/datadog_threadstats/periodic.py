@@ -3,18 +3,30 @@
 # Copyright 2023-Present Datadog, Inc.
 
 from threading import Thread, Event
+from typing import Callable
 
 
 class PeriodicTask:
-    def __init__(self, task, interval=60):
-        self.task = task
-        self.interval = interval
-        self.event = Event()
+    """Manages a periodic task in a thread.
+
+    :param task: The task to periodically run.
+    :type task: callable
+
+    :param interval: The interval between each task run, in seconds.
+    :type interval: int
+    """
+
+    def __init__(self, task: Callable, interval: int = 60):
+        self._task = task
+        self._interval = interval
+        self._event = Event()
 
     def start(self):
-        thread = Thread(target=self.run, daemon=True)
+        """Start the periodic task."""
+        thread = Thread(target=self._run, daemon=True)
         thread.start()
 
-    def run(self):
-        while not self.event.wait(self.interval):
-            self.task()
+    def _run(self):
+        """Loop to run in the thread."""
+        while not self._event.wait(self._interval):
+            self._task()
