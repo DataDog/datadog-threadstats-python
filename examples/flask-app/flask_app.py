@@ -12,7 +12,7 @@ app = Flask(__name__)
 @app.route("/")
 def hello_world():
     stats.count("myflask.home.hits")
-    stats.log("GET callled on /")
+    stats.log("GET called on /")
     memory_usage = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
     stats.gauge("myflask.memory", memory_usage)
     return "<p>Hello, World!</p>"
