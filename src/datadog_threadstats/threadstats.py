@@ -40,7 +40,7 @@ class ThreadStats:
         self._metric_series: List[MetricSeries] = []
         self._log_items: List[HTTPLogItem] = []
 
-    def start(self):
+    def start(self) -> None:
         """Start the background task."""
         self._periodic_task.start()
 
@@ -51,7 +51,7 @@ class ThreadStats:
         hostname: Optional[str] = None,
         service: Optional[str] = None,
         tags: Optional[List[str]] = None,
-    ):
+    ) -> None:
         """Add a pending log to send.
 
         :param message: The log message.
@@ -81,7 +81,7 @@ class ThreadStats:
 
         self._log_items.append(HTTPLogItem(**kwargs))
 
-    def count(self, metric_name: str, value: float = 1, tags: Optional[List[str]] = None):
+    def count(self, metric_name: str, value: float = 1, tags: Optional[List[str]] = None) -> None:
         """Add a pending count metric to send.
 
         :param metric_name: The name of the metric.
@@ -95,7 +95,7 @@ class ThreadStats:
         """
         self.metric(metric_name, MetricIntakeType.COUNT, value, tags)
 
-    def gauge(self, metric_name: str, value: float, tags: Optional[List[str]] = None):
+    def gauge(self, metric_name: str, value: float, tags: Optional[List[str]] = None) -> None:
         """Add a pending gauge metric to send.
 
         :param metric_name: The name of the metric.
@@ -109,7 +109,7 @@ class ThreadStats:
         """
         self.metric(metric_name, MetricIntakeType.GAUGE, value, tags)
 
-    def rate(self, metric_name: str, value: float, tags: Optional[List[str]] = None):
+    def rate(self, metric_name: str, value: float, tags: Optional[List[str]] = None) -> None:
         """Add a pending rate metric to send.
 
         :param metric_name: The name of the metric.
@@ -123,7 +123,7 @@ class ThreadStats:
         """
         self.metric(metric_name, MetricIntakeType.RATE, value, tags)
 
-    def metric(self, metric_name: str, metric_type: MetricIntakeType, value: float, tags: Optional[List[str]] = None):
+    def metric(self, metric_name: str, metric_type: MetricIntakeType, value: float, tags: Optional[List[str]] = None) -> None:
         """Add a pending metric to send.
 
         :param metric_name: The name of the metric.
@@ -151,14 +151,14 @@ class ThreadStats:
             )
         )
 
-    def _flush(self):
+    def _flush(self) -> None:
         """Flush data points accumulated during last interval."""
         metric_series, self._metric_series = self._metric_series, []
         if metric_series:
-            payload = MetricPayload(series=metric_series)
-            self._metrics_api.submit_metrics(payload)
+            metric_payload = MetricPayload(series=metric_series)
+            self._metrics_api.submit_metrics(metric_payload)
 
         log_items, self._log_items = self._log_items, []
         if log_items:
-            payload = HTTPLog(log_items)
-            self._logs_api.submit_log(payload)
+            log_payload = HTTPLog(log_items)
+            self._logs_api.submit_log(log_payload)

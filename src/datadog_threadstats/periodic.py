@@ -21,12 +21,12 @@ class PeriodicTask:
         self._interval = interval
         self._event = Event()
 
-    def start(self):
+    def start(self) -> None:
         """Start the periodic task."""
         thread = Thread(target=self._run, daemon=True)
         thread.start()
 
-    def _run(self):
+    def _run(self) -> None:
         """Loop to run in the thread."""
         while not self._event.wait(self._interval):
             self._task()
