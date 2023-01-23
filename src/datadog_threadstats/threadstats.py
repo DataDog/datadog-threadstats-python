@@ -138,18 +138,19 @@ class ThreadStats:
         :param tags: The tags associated with the data point.
         :type tags: list
         """
-        self._metric_series.append(
-            MetricSeries(
-                metric=metric_name,
-                type=metric_type,
-                points=[
-                    MetricPoint(
-                        timestamp=int(datetime.now().timestamp()),
-                        value=value,
-                    )
-                ],
-            )
-        )
+        series_args = {
+            "metric": metric_name,
+            "type": metric_type,
+            "points": [
+                MetricPoint(
+                    timestamp=int(datetime.now().timestamp()),
+                    value=value,
+                )
+            ],
+        }
+        if tags is not None:
+            series_args["tags"] = tags
+        self._metric_series.append(MetricSeries(**series_args))
 
     def _flush(self) -> None:
         """Flush data points accumulated during last interval."""

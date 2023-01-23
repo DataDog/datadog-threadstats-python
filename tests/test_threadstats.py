@@ -93,6 +93,26 @@ def test_gauge():
 
 
 @freeze_time()
+def test_count_tags():
+    stats = ThreadStats()
+    stats.count("mymetric", tags=["host:myhost"])
+
+    assert stats._metric_series == [
+        MetricSeries(
+            metric="mymetric",
+            tags=["host:myhost"],
+            type=MetricIntakeType.COUNT,
+            points=[
+                MetricPoint(
+                    timestamp=int(datetime.now().timestamp()),
+                    value=1.0,
+                )
+            ],
+        )
+    ]
+
+
+@freeze_time()
 def test_log():
     stats = ThreadStats()
     stats.log("First log", source="python")
