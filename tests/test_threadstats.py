@@ -135,3 +135,10 @@ def test_log():
     ]
 
     assert stats._log_items == []
+
+
+@freeze_time()
+def test_log_tags():
+    stats = ThreadStats()
+    stats.log("First log", source="python", tags=["host:myhost", "tag:tag1"])
+    assert stats._log_items == [HTTPLogItem(message="First log", ddsource="python", ddtags="host:myhost,tag:tag1")]

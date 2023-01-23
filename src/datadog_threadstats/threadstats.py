@@ -77,7 +77,7 @@ class ThreadStats:
         if service is not None:
             kwargs["service"] = service
         if tags is not None:
-            kwargs["ddtags"] = tags
+            kwargs["ddtags"] = ",".join(tags)
 
         self._log_items.append(HTTPLogItem(**kwargs))
 
@@ -123,7 +123,9 @@ class ThreadStats:
         """
         self.metric(metric_name, MetricIntakeType.RATE, value, tags)
 
-    def metric(self, metric_name: str, metric_type: MetricIntakeType, value: float, tags: Optional[List[str]] = None) -> None:
+    def metric(
+        self, metric_name: str, metric_type: MetricIntakeType, value: float, tags: Optional[List[str]] = None
+    ) -> None:
         """Add a pending metric to send.
 
         :param metric_name: The name of the metric.
